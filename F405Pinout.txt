@@ -1,0 +1,15 @@
+Pins need to be connected:
+
+GND, +5V <- Power (Pin 1 5V and Pin 4 GND)
+GND, +5V -> STR Sensor
+GND, +3.3V -> OLED
+
+Can 1 H -> Can Bus (Pin 2)
+Can 1 L -> Can bus (Pin 3)
+
+IMC Connector
+
+Pin 1: +5V
+Pin 2: Can H
+Pin 3: Can L
+Pin 4: GND
