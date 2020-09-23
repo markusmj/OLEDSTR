@@ -144,8 +144,18 @@ int main(void)
     sFilterConfig.FilterActivation = ENABLE;
     sFilterConfig.SlaveStartFilterBank = 14;
 
+ /*   //Let all through mask
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    if(HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
+        {
+          //Filter configuration Error
+          Error_Handler();
+        }
+*/
     // BMS Voltage
-    // Can Message (HPF019 ID=0xB Bytes 0-3) 0x7B6, High to Low, Bytes 0-1
+    // Can Message 0x7B6(1974), High to Low, Bytes 0-1
 
     sFilterConfig.FilterBank = 0;
     sFilterConfig.FilterIdHigh = 0x07B6 << 5;
@@ -158,7 +168,7 @@ int main(void)
     }
 
     // Low Voltage
-    // Can Message 0x527, High to Low, Byte 1
+    // Can Message 0x527(1319), High to Low, Byte 1
 
     sFilterConfig.FilterBank = 1;
     sFilterConfig.FilterIdHigh = 0x0527 << 5;
@@ -171,9 +181,9 @@ int main(void)
         }
 
     // Drive Mode & Max Torque
-    // Can Message 0x7C8 Byte 1=Max Torque Byte 0=driveModeFuture
+    // Can Message 0x7C8(1992) Byte 1=Max Torque Byte 0=driveModeFuture
 
-    sFilterConfig.FilterBank = 1;
+    sFilterConfig.FilterBank = 2;
     sFilterConfig.FilterIdHigh = 0x07C8 << 5;
     sFilterConfig.FilterMaskIdHigh = 0x07C8 << 5;
 
@@ -222,6 +232,7 @@ int main(void)
 	  	  if (PWMValue != 0)
 	  	  {
 	  		STRAngle = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2)*360/PWMValue;
+	  		STRAngle = 360-(STRAngle-22);
 	  	  }
 	  	  else
 	  	  {
@@ -250,12 +261,12 @@ int main(void)
 	  		                    break;
 
 	  		    			case 0x527 :  // Low Voltage Battery or is it 0x520???
-	  		    				LVBatt=RxData[1];
+	  		    				LVBatt=RxData[1]*1.216;
 	  		    				break;
 
 	  		    			case 0x07C8 :  // Byte 1=Max Torque Byte 0=driveModeFuture
-	  		    				DriveMode=RxData[0];
-	  		    				Turku=RxData[0];
+	  		    				DriveMode=RxData[3];
+	  		    				Turku=RxData[1];
 	  		    				break;
 
 
@@ -302,11 +313,11 @@ if (HAL_GetTick()-scrtimer > 100) {
 	    sprintf(txt, "#%i", DriveMode);
 	    SSD1306_Puts (txt, &Font_11x18, 1);
 	    SSD1306_GotoXY (65,45);
-	    sprintf(txt, "%iNm", Turku);
+	    sprintf(txt, "%iNm ", Turku);
 	    SSD1306_Puts (txt, &Font_11x18, 1);
 	    SSD1306_UpdateScreen();
         scrtimer=HAL_GetTick();
-} else { HAL_Delay(4);}
+} else { HAL_Delay(2);}
 
 	  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
 
@@ -417,7 +428,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 1600000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -526,6 +537,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
+
 
 /* USER CODE END 4 */
 
